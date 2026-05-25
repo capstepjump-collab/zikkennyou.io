@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychology Experiment</title>
     <style>
-        /* HTMLではなくCSSの最上部で最も強力にフォントを吸い込みます */
+        /* CSSの最上部でフォントを強制的に吸い込みます */
         @import url('https://googleapis.com');
-        /* 🌸 システムが更新されたか見分けるため、背景を一時的に薄いピンクにしています */
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #ffe4e6; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
+
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
@@ -18,14 +18,21 @@
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 800; color: #1e3a8a; }
-        .font-sharp { font-family: 'Stick', sans-serif; color: #000000; }
-        .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #475569; }
+        
+        /* 万が一に備え、スマホやPCが内蔵している本物の丸ゴシックや極太角フォントを保険として超強力にセット */
+        .font-round { font-family: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "HG丸ｺﾞｼｯｸM-PRO", sans-serif; font-weight: 800; color: #1e3a8a; }
+        .font-sharp { font-family: "Stick", "Impact", "Arial Black", sans-serif; color: #000000; }
+        .font-neutral { font-family: "Noto Sans JP", sans-serif; font-weight: 500; color: #64748b; }
+        
         #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <!-- ⬇️ 画面外で見えない位置に、フォントを先回りで強制ダウンロードさせる「目印」を隠して配置 -->
+    <div style="opacity: 0; position: absolute; top: 0; font-family: 'M PLUS Rounded 1c'; font-weight: 800;">a</div>
+    <div style="opacity: 0; position: absolute; top: 0; font-family: 'Stick';">a</div>
+
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
     <div id="experiment-container">
         <div id="lang-screen">
