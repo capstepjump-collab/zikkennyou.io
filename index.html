@@ -10,10 +10,8 @@
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
         p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
-        /* 💡 画像でも普通の文字（記号用）でも、どちらでもド真ん中に大きく綺麗に収まるエリアに調整しました */
-        #stimulus-container { width: 100%; min-height: 350px; margin-bottom: 50px; display: flex; align-items: center; justify-content: center; font-size: 110px; font-weight: bold; }
+        #stimulus-container { width: 100%; min-height: 350px; margin-bottom: 50px; display: flex; align-items: center; justify-content: center; }
         #stimulus-img { max-width: 350px; max-height: 350px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
-        
         .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
@@ -41,11 +39,10 @@
             <p id="start-desc2"></p>
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
-        <!-- メイン画面（画像とテキストの両方に対応） -->
+        <!-- メイン画面（画像のみを表示する構造） -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus-container">
-                <img id="stimulus-img" src="" alt="stimulus" class="hidden">
-                <span id="stimulus-text" class="hidden"></span>
+                <img id="stimulus-img" src="" alt="stimulus">
             </div>
             <div class="button-container">
                 <button class="btn" id="choice-round" onclick="handleResponse('round')"></button>
@@ -61,7 +58,7 @@
         </div>
     </div>
     <script>
-        // 送っていただいた24枚の画像リストと100%完全一致させました
+        // 💡 記号（○○○、×××）を完全に排除し、24枚の単語画像だけで構成しました
         const stimuliWords = [
             { text: 'ブーバ', type: 'round', lang: 'ja', fileBase: 'booba' },
             { text: 'マロ', type: 'round', lang: 'ja', fileBase: 'maro' },
@@ -78,10 +75,7 @@
             { text: 'Kiki', type: 'sharp', lang: 'en', fileBase: 'kiki' },
             { text: 'Takete', type: 'sharp', lang: 'en', fileBase: 'takete' },
             { text: 'Kaki', type: 'sharp', lang: 'en', fileBase: 'kaki' },
-            { text: 'Toge', type: 'sharp', lang: 'en', fileBase: 'toge' },
-            // 💡 記号は画像ファイル名ではなく、文字として出力するための特殊設定にしました
-            { text: '○○○', type: 'round', lang: 'both', fileBase: 'text_only' },
-            { text: '×××', type: 'sharp', lang: 'both', fileBase: 'text_only' }
+            { text: 'Toge', type: 'sharp', lang: 'en', fileBase: 'toge' }
         ];
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
@@ -112,29 +106,23 @@
             return array;
         }
         function setupTrials() {
-            const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
+            const filtered = stimuliWords.filter(w => w.lang === selectedLang);
             let round_sharp_pool = [], sharp_round_pool = [], normal_pool = [];      
             filtered.forEach(w => {
                 fonts.forEach(f => {
-                    if (w.fileBase === 'text_only') {
-                        // 記号（○○○、×××）は中立フォント（普通の文字）としてプールに入れる
-                        if (f === 'neutral') {
-                            normal_pool.push({ ...w, font: f, isImage: false });
-                        }
-                    } else {
-                        // 通常の単語は「images/新しいフォルダー/」の画像パスを指定
-                        const path = 'images/新しいフォルダー/' + w.fileBase + '_' + f + '.png.png';
-                        const item = { ...w, font: f, imgPath: path, isImage: true };
-                        if (w.type === 'round' && f === 'sharp') { round_sharp_pool.push(item); } 
-                        else if (w.type === 'sharp' && f === 'round') { sharp_round_pool.push(item); } 
-                        else { normal_pool.push(item); }
-                    }
+                    const path = 'images/新しいフォルダー/' + w.fileBase + '_' + f + '.png.png';
+                    const item = { ...w, font: f, imgPath: path };
+                    if (w.type === 'round' && f === 'sharp') { round_sharp_pool.push(item); } 
+                    else if (w.type === 'sharp' && f === 'round') { sharp_round_pool.push(item); } 
+                    else { normal_pool.push(item); }
                 });
             });
             shuffle(round_sharp_pool); shuffle(sharp_round_pool); shuffle(normal_pool);
             let selectedTrials = [];
+            // 矛盾条件を2問ずつ確定選出
             selectedTrials.push(round_sharp_pool.pop()); selectedTrials.push(round_sharp_pool.pop());
             selectedTrials.push(sharp_round_pool.pop()); selectedTrials.push(sharp_round_pool.pop());
+            // 残りの11問枠にナチュラル（中立）を含む残りのプールを補充
             let remainsPool = [...normal_pool, ...round_sharp_pool, ...sharp_round_pool];
             shuffle(remainsPool);
             for (let i = 0; i < 11; i++) { selectedTrials.push(remainsPool.pop()); }
@@ -154,27 +142,17 @@
             }
             document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
             const t = trials[currentTrialIndex];
-            
-            const imgEl = document.getElementById('stimulus-img');
-            const textEl = document.getElementById('stimulus-text');
-            
-            // 💡 画像かテキストかによって画面の表示を自動で切り替える賢い仕組み
-            if (t.isImage) {
-                textEl.classList.add('hidden');
-                imgEl.src = t.imgPath;
-                imgEl.classList.remove('hidden');
-            } else {
-                imgEl.classList.add('hidden');
-                textEl.innerText = t.text;
-                textEl.classList.remove('hidden');
-            }
+            document.getElementById('stimulus-img').src = t.imgPath;
             startTime = performance.now();
         }
         function handleResponse(res) {
             const rt = performance.now() - startTime;
-            let fontName = "ゴシック";
+            
+            // 💡 管理者用データに表示されるフォント名を綺麗に翻訳して整理しました
+            let fontName = "ナチュラル";
             if(trials[currentTrialIndex].font === "round") fontName = "丸フォント";
             if(trials[currentTrialIndex].font === "sharp") fontName = "Stickフォント";
+            
             let responseName = res === "round" ? "丸い" : "角ばった";
             results.push({
                 word: trials[currentTrialIndex].text,
