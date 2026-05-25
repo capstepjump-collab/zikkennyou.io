@@ -6,7 +6,8 @@
     <title>Psychology Experiment</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
+    <!-- より丸いZen Maru Gothicと、トゲトゲしたStickを読み込み -->
+    <link href="https://googleapis.com/css2?family=Stick&family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
         body { display: flex; justify-content: center; align-items: center; position: relative; }
@@ -14,13 +15,29 @@
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
         p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
-        #stimulus { font-size: 130px; margin-bottom: 70px; min-height: 200px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        
+        /* 刺激語のスタイル：サイズを少し大きくし、フォントの違いが瞬時に脳に刺さるように調整 */
+        #stimulus { font-size: 140px; margin-bottom: 70px; min-height: 220px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        
         .button-container { display: flex; justify-content: center; gap: 50px; }
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; }
-        .font-sharp { font-family: 'Stick', sans-serif; }
+        
+        /* 【極丸】圧倒的な太さと丸みを持たせる設定 */
+        .font-round { 
+            font-family: 'Zen Maru Gothic', sans-serif; 
+            font-weight: 900; 
+            color: #222;
+        }
+        
+        /* 【極角】Stickフォントに加え、輪郭をわずかに補正してトゲトゲしさを強調 */
+        .font-sharp { 
+            font-family: 'Stick', sans-serif; 
+            color: #111;
+            text-shadow: 0.5px 0.5px 0px #111, -0.5px -0.5px 0px #111; /* 文字の線をよりシャープにエッジ立たせる */
+        }
+        
         .hidden { display: none !important; }
     </style>
 </head>
@@ -47,7 +64,7 @@
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
 
-        <!-- ３．メイン画面（開始後に選択肢が出現） -->
+        <!-- メイン画面（開始後に選択肢が出現） -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
@@ -64,7 +81,6 @@
     </div>
 
     <script>
-        // 日本語・英語・共通（both）を明確に分離
         const stimuliWords = [
             { text: 'ブーバ', type: 'round', lang: 'ja' }, { text: 'マロ', type: 'round', lang: 'ja' },
             { text: 'ルル', type: 'round', lang: 'ja' }, { text: 'モコ', type: 'round', lang: 'ja' },
@@ -102,7 +118,6 @@
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
-        // ２．重複を完全に防ぎ、15問をランダム抽出する処理
         function setupTrials() {
             let pool = [];
             const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
