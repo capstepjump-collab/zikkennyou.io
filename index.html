@@ -5,13 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>心理学実験 / Psychology Experiment</title>
     
-    <!-- Google Fontsの読み込み（フォントをさらに大きく見やすく） -->
+    <!-- Google Fontsの読み込み -->
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
     <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
 
     <style>
-        /* ４．画面の真ん中に寄せ、全体を大きく表示するスタイル */
         html, body {
             margin: 0;
             padding: 0;
@@ -28,7 +27,6 @@
             position: relative;
         }
 
-        /* カウンターを大きく、見やすい位置に */
         #counter {
             position: absolute;
             top: 30px;
@@ -42,7 +40,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        /* 実験コンテナ（中央配置・サイズ拡大） */
         #experiment-container {
             text-align: center;
             max-width: 900px;
@@ -51,7 +48,6 @@
             box-sizing: border-box;
         }
 
-        /* 文字サイズの大幅拡大 */
         h1 {
             font-size: 3rem;
             color: #222;
@@ -65,9 +61,8 @@
             margin-bottom: 20px;
         }
 
-        /* 刺激語のスタイル（特大サイズに変更） */
         #stimulus {
-            font-size: 130px;  /* 80px から 130px へ拡大 */
+            font-size: 130px;
             margin-bottom: 70px;
             min-height: 200px;
             display: flex;
@@ -76,7 +71,6 @@
             user-select: none;
         }
 
-        /* ボタンコンテナと特大ボタン */
         .button-container {
             display: flex;
             justify-content: center;
@@ -85,7 +79,7 @@
 
         .btn {
             padding: 25px 60px;
-            font-size: 2rem; /* ボタンの文字も大きく */
+            font-size: 2rem;
             font-weight: bold;
             cursor: pointer;
             border: none;
@@ -104,7 +98,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        /* 言語選択用ボタンの装飾 */
         .lang-btn {
             background-color: #007bff;
             color: white;
@@ -114,7 +107,6 @@
             background-color: #0056b3;
         }
 
-        /* フォント指定（より特徴が際立つよう太字に） */
         .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; }
         .font-sharp { font-family: 'Stick', sans-serif; }
 
@@ -123,11 +115,10 @@
 </head>
 <body>
 
-    <!-- 残り数カウンター -->
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
 
     <div id="experiment-container">
-        <!-- １．言語選択画面（最初の画面） -->
+        <!-- １．言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -137,7 +128,7 @@
             </div>
         </div>
 
-        <!-- 導入画面（言語によって文字が変わります） -->
+        <!-- 導入画面 -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title">実験開始</h1>
             <p id="start-desc1">表示される文字が「丸い」か「角ばっている」か判断してください。</p>
@@ -145,7 +136,7 @@
             <button class="btn" id="start-btn" onclick="startExperiment()">開始する</button>
         </div>
 
-        <!-- ３．実験メイン画面（開始ボタンを押した後に選択可能） -->
+        <!-- 実験メイン画面 -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
@@ -161,8 +152,8 @@
         </div>
     </div>
 
+    <!-- ここから下のJavaScriptが削られずに残っているか確認してください -->
     <script>
-        // ２．質問の種類を追加（全18種類にボリュームアップ）
         const stimuliWords = [
             { text: 'ブーバ', type: 'round' }, { text: 'Bouba', type: 'round' },
             { text: 'マロ', type: 'round' }, { text: 'Malo', type: 'round' },
@@ -183,7 +174,6 @@
         let results = [];
         let selectedLang = 'ja';
 
-        // 翻訳テキストの定義
         const textData = {
             ja: {
                 counter: "残り",
@@ -209,12 +199,10 @@
             }
         };
 
-        // １．言語の選択と画面テキストの切り替え
         function selectLanguage(lang) {
             selectedLang = lang;
             const data = textData[lang];
 
-            // テキストの一括書き換え
             document.getElementById('counter-label').innerText = data.counter;
             document.getElementById('start-title').innerText = data.title;
             document.getElementById('start-desc1').innerHTML = data.desc1;
@@ -225,33 +213,26 @@
             document.getElementById('end-title').innerText = data.endTitle;
             document.getElementById('end-desc').innerText = data.endDesc;
 
-            // 画面の切り替え
             document.getElementById('lang-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
-        // ２．「1回に同じものが出ない」ようにする仕組み（シャフル）
         function setupTrials() {
             let pool = [];
-            
-            // 全18パターンの「単語 × フォント」の組み合わせ（計36通り）を作成
             stimuliWords.forEach(word => {
                 fonts.forEach(font => {
                     pool.push({ ...word, font: font });
                 });
             });
 
-            // フィッシャー–イェーツのシャッフルアルゴリズムで完全に配列をシャッフル
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
 
-            // シャッフルされた中から先頭の15問を今回の実験に採用（絶対に重複しません）
             trials = pool.slice(0, 15);
         }
 
-        // ３．開始ボタンを押した後に実験メイン画面へ進む
         function startExperiment() {
             setupTrials();
             document.getElementById('start-screen').classList.add('hidden');
@@ -282,5 +263,27 @@
             const isTooFast = reactionTime < 250;
 
             const trialResult = {
-                lang: selectedLang, // 日本語か英語かもデータに記録
+                lang: selectedLang,
                 word: trials[currentTrialIndex].text,
+                font: trials[currentTrialIndex].font,
+                response: response,
+                correct: trials[currentTrialIndex].type === response,
+                rt: reactionTime,
+                tooFast: isTooFast
+            };
+
+            results.push(trialResult);
+            console.log(trialResult);
+
+            currentTrialIndex++;
+            nextTrial();
+        }
+
+        function endExperiment() {
+            document.getElementById('trial-screen').classList.add('hidden');
+            document.getElementById('counter').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
