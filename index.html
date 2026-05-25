@@ -1,155 +1,286 @@
-    /* 残り質問数の表示 */
-    #counter {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 1.2rem;
-        color: #666;
-    }
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>心理学実験 / Psychology Experiment</title>
+    
+    <!-- Google Fontsの読み込み（フォントをさらに大きく見やすく） -->
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
 
-    #experiment-container {
-        text-align: center;
-    }
+    <style>
+        /* ４．画面の真ん中に寄せ、全体を大きく表示するスタイル */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #f0f2f5;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
 
-    /* 刺激語のスタイル */
-    #stimulus {
-        font-size: 80px;
-        margin-bottom: 50px;
-        min-height: 120px;
-    }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
 
-    /* 回答ボタンのスタイル */
-    .button-container {
-        display: flex;
-        gap: 40px;
-    }
+        /* カウンターを大きく、見やすい位置に */
+        #counter {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #444;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
 
-    .btn {
-        padding: 20px 40px;
-        font-size: 24px;
-        cursor: pointer;
-        border: none;
-        border-radius: 10px;
-        background-color: #fff;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        transition: transform 0.1s;
-    }
+        /* 実験コンテナ（中央配置・サイズ拡大） */
+        #experiment-container {
+            text-align: center;
+            max-width: 900px;
+            width: 90%;
+            padding: 40px;
+            box-sizing: border-box;
+        }
 
-    .btn:active {
-        transform: scale(0.95);
-    }
+        /* 文字サイズの大幅拡大 */
+        h1 {
+            font-size: 3rem;
+            color: #222;
+            margin-bottom: 30px;
+        }
 
-    /* フォント指定 */
-    .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; }
-    .font-sharp { font-family: 'Stick', sans-serif; }
+        p {
+            font-size: 1.5rem;
+            color: #444;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
 
-    .hidden { display: none; }
-</style>
-<div id="counter">残り: <span id="remaining">15</span></div>
+        /* 刺激語のスタイル（特大サイズに変更） */
+        #stimulus {
+            font-size: 130px;  /* 80px から 130px へ拡大 */
+            margin-bottom: 70px;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
 
-<div id="experiment-container">
-    <!-- 導入画面 -->
-    <div id="start-screen">
-        <h1>実験開始</h1>
-        <p>表示される文字が「丸い」か「角ばっている」か判断してください。</p>
-        <p>できるだけ<strong>速く、正確に</strong>ボタンを押してください。</p>
-        <button class="btn" onclick="startExperiment()">開始する</button>
-    </div>
+        /* ボタンコンテナと特大ボタン */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+        }
 
-    <!-- 実験メイン画面 -->
-    <div id="trial-screen" class="hidden">
-        <div id="stimulus"></div>
-        <div class="button-container">
-            <button class="btn font-round" onclick="handleResponse('round')">丸い</button>
-            <button class="btn font-sharp" onclick="handleResponse('sharp')">角ばった</button>
+        .btn {
+            padding: 25px 60px;
+            font-size: 2rem; /* ボタンの文字も大きく */
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            border-radius: 15px;
+            background-color: #fff;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+
+        .btn:hover {
+            background-color: #fafafa;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* 言語選択用ボタンの装飾 */
+        .lang-btn {
+            background-color: #007bff;
+            color: white;
+            margin: 15px;
+        }
+        .lang-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* フォント指定（より特徴が際立つよう太字に） */
+        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; }
+        .font-sharp { font-family: 'Stick', sans-serif; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- 残り数カウンター -->
+    <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
+
+    <div id="experiment-container">
+        <!-- １．言語選択画面（最初の画面） -->
+        <div id="lang-screen">
+            <h1>Language / 言語選択</h1>
+            <p>Please select your language.<br>言語を選択してください。</p>
+            <div class="button-container">
+                <button class="btn lang-btn" onclick="selectLanguage('ja')">日本語</button>
+                <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
+            </div>
+        </div>
+
+        <!-- 導入画面（言語によって文字が変わります） -->
+        <div id="start-screen" class="hidden">
+            <h1 id="start-title">実験開始</h1>
+            <p id="start-desc1">表示される文字が「丸い」か「角ばっている」か判断してください。</p>
+            <p id="start-desc2">できるだけ<strong>速く、正確に</strong>ボタンを押してください。</p>
+            <button class="btn" id="start-btn" onclick="startExperiment()">開始する</button>
+        </div>
+
+        <!-- ３．実験メイン画面（開始ボタンを押した後に選択可能） -->
+        <div id="trial-screen" class="hidden">
+            <div id="stimulus"></div>
+            <div class="button-container">
+                <button class="btn font-round" id="choice-round" onclick="handleResponse('round')">丸い</button>
+                <button class="btn font-sharp" id="choice-sharp" onclick="handleResponse('sharp')">角ばった</button>
+            </div>
+        </div>
+
+        <!-- 終了画面 -->
+        <div id="end-screen" class="hidden">
+            <h1 id="end-title">実験終了</h1>
+            <p id="end-desc">ご協力ありがとうございました。</p>
         </div>
     </div>
 
-    <!-- 終了画面 -->
-    <div id="end-screen" class="hidden">
-        <h1>実験終了</h1>
-        <p>ご協力ありがとうございました。</p>
-    </div>
-</div>
+    <script>
+        // ２．質問の種類を追加（全18種類にボリュームアップ）
+        const stimuliWords = [
+            { text: 'ブーバ', type: 'round' }, { text: 'Bouba', type: 'round' },
+            { text: 'マロ', type: 'round' }, { text: 'Malo', type: 'round' },
+            { text: 'ルル', type: 'round' }, { text: 'Lulu', type: 'round' },
+            { text: 'モコ', type: 'round' }, { text: 'Moko', type: 'round' },
+            { text: '○○○', type: 'round' },
+            { text: 'キキ', type: 'sharp' }, { text: 'Kiki', type: 'sharp' },
+            { text: 'タケテ', type: 'sharp' }, { text: 'Takete', type: 'sharp' },
+            { text: 'カキ', type: 'sharp' }, { text: 'Kaki', type: 'sharp' },
+            { text: 'トゲ', type: 'sharp' }, { text: 'Toge', type: 'sharp' },
+            { text: '×××', type: 'sharp' }
+        ];
 
-<script>
-    // 実験データの設定
-    const stimuliWords = [
-        { text: 'ブーバ', type: 'round' }, { text: 'Bouba', type: 'round' },
-        { text: 'マロ', type: 'round' }, { text: 'Malo', type: 'round' },
-        { text: 'ルル', type: 'round' },
-        { text: 'キキ', type: 'sharp' }, { text: 'Kiki', type: 'sharp' },
-        { text: 'タケテ', type: 'sharp' }, { text: 'Takete', type: 'sharp' },
-        { text: 'カキ', type: 'sharp' },
-        { text: '○○○', type: 'round' }, { text: '×××', type: 'sharp' }
-    ];
+        const fonts = ['font-round', 'font-sharp'];
+        let trials = [];
+        let currentTrialIndex = 0;
+        let startTime;
+        let results = [];
+        let selectedLang = 'ja';
 
-    const fonts = ['font-round', 'font-sharp'];
-    let trials = [];
-    let currentTrialIndex = 0;
-    let startTime;
-    let results = [];
-
-    // 15問の試行を作成（ランダム）
-    function setupTrials() {
-        for (let i = 0; i < 15; i++) {
-            const word = stimuliWords[Math.floor(Math.random() * stimuliWords.length)];
-            const font = fonts[Math.floor(Math.random() * fonts.length)];
-            trials.push({ ...word, font: font });
-        }
-    }
-
-    function startExperiment() {
-        setupTrials();
-        document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('trial-screen').classList.remove('hidden');
-        nextTrial();
-    }
-
-    function nextTrial() {
-        if (currentTrialIndex >= trials.length) {
-            endExperiment();
-            return;
-        }
-        
-        document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
-        const stimulusElement = document.getElementById('stimulus');
-        const trial = trials[currentTrialIndex];
-        
-        stimulusElement.innerText = trial.text;
-        stimulusElement.className = trial.font;
-        
-        startTime = performance.now();
-    }
-
-    function handleResponse(response) {
-        const endTime = performance.now();
-        const reactionTime = endTime - startTime;
-
-        // 異常値判定：250ms以下は「早すぎ」としてフラグを立てる
-        const isTooFast = reactionTime < 250;
-
-        const trialResult = {
-            word: trials[currentTrialIndex].text,
-            font: trials[currentTrialIndex].font,
-            response: response,
-            correct: trials[currentTrialIndex].type === response,
-            rt: reactionTime,
-            tooFast: isTooFast
+        // 翻訳テキストの定義
+        const textData = {
+            ja: {
+                counter: "残り",
+                title: "実験開始",
+                desc1: "表示される文字の印象が「丸い」か「角ばっている」か判断してください。",
+                desc2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。",
+                btnStart: "開始する",
+                choiceRound: "丸い",
+                choiceSharp: "角ばった",
+                endTitle: "実験終了",
+                endDesc: "ご協力ありがとうございました。"
+            },
+            en: {
+                counter: "Remaining",
+                title: "Experiment Start",
+                desc1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.",
+                desc2: "Please press the button as <strong>fast and accurately</strong> as possible.",
+                btnStart: "Start",
+                choiceRound: "Round",
+                choiceSharp: "Sharp",
+                endTitle: "Experiment Completed",
+                endDesc: "Thank you for your cooperation."
+            }
         };
 
-        results.push(trialResult);
-        console.log(trialResult); // デバッグ用にコンソールに表示
+        // １．言語の選択と画面テキストの切り替え
+        function selectLanguage(lang) {
+            selectedLang = lang;
+            const data = textData[lang];
 
-        currentTrialIndex++;
-        nextTrial();
-    }
+            // テキストの一括書き換え
+            document.getElementById('counter-label').innerText = data.counter;
+            document.getElementById('start-title').innerText = data.title;
+            document.getElementById('start-desc1').innerHTML = data.desc1;
+            document.getElementById('start-desc2').innerHTML = data.desc2;
+            document.getElementById('start-btn').innerText = data.btnStart;
+            document.getElementById('choice-round').innerText = data.choiceRound;
+            document.getElementById('choice-sharp').innerText = data.choiceSharp;
+            document.getElementById('end-title').innerText = data.endTitle;
+            document.getElementById('end-desc').innerText = data.endDesc;
 
-    function endExperiment() {
-        document.getElementById('trial-screen').classList.add('hidden');
-        document.getElementById('counter').classList.add('hidden');
-        document.getElementById('end-screen').classList.remove('hidden');
-        
-        // ここでGASに結果を送信する処理を後ほど追加可能
-    }
-</script>
+            // 画面の切り替え
+            document.getElementById('lang-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        // ２．「1回に同じものが出ない」ようにする仕組み（シャフル）
+        function setupTrials() {
+            let pool = [];
+            
+            // 全18パターンの「単語 × フォント」の組み合わせ（計36通り）を作成
+            stimuliWords.forEach(word => {
+                fonts.forEach(font => {
+                    pool.push({ ...word, font: font });
+                });
+            });
+
+            // フィッシャー–イェーツのシャッフルアルゴリズムで完全に配列をシャッフル
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+
+            // シャッフルされた中から先頭の15問を今回の実験に採用（絶対に重複しません）
+            trials = pool.slice(0, 15);
+        }
+
+        // ３．開始ボタンを押した後に実験メイン画面へ進む
+        function startExperiment() {
+            setupTrials();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('counter').classList.remove('hidden');
+            document.getElementById('trial-screen').classList.remove('hidden');
+            nextTrial();
+        }
+
+        function nextTrial() {
+            if (currentTrialIndex >= trials.length) {
+                endExperiment();
+                return;
+            }
+            
+            document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
+            const stimulusElement = document.getElementById('stimulus');
+            const trial = trials[currentTrialIndex];
+            
+            stimulusElement.innerText = trial.text;
+            stimulusElement.className = trial.font;
+            
+            startTime = performance.now();
+        }
+
+        function handleResponse(response) {
+            const endTime = performance.now();
+            const reactionTime = endTime - startTime;
+            const isTooFast = reactionTime < 250;
+
+            const trialResult = {
+                lang: selectedLang, // 日本語か英語かもデータに記録
+                word: trials[currentTrialIndex].text,
