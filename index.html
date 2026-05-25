@@ -165,7 +165,6 @@
             const uid = "id_" + Date.now();
             const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
             
-            // ⚠️ 以下のURLをご自身のGASの長いURLに書き換えてください！
             const gasUrl = "https://script.google.com/macros/s/AKfycbz4VtiW2Xic__N57l3Yq-Hrvs2nmO122sR62HqzJUsH_r7sUlzzpKVzFj8gSWGvJsMY/exec";
             
             if (gasUrl !== "ここに" + "コピーしたウェブアプリのURLを貼り付けてください") {
