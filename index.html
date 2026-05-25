@@ -4,12 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychology Experiment</title>
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <!-- 太さを公式規格の800に修正して読み込みます -->
-    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
+        /* HTMLではなくCSSの最上部で最も強力にフォントを吸い込みます */
+        @import url('https://googleapis.com');
+        /* 🌸 システムが更新されたか見分けるため、背景を一時的に薄いピンクにしています */
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #ffe4e6; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
@@ -19,12 +18,9 @@
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        
-        /* 認識を確実にするため、フォント名を二重引用符で囲いました */
-        .font-round { font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; color: #1e3a8a; }
-        .font-sharp { font-family: "Stick", sans-serif; color: #000000; }
-        .font-neutral { font-family: "Noto Sans JP", sans-serif; font-weight: 500; color: #64748b; }
-        
+        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 800; color: #1e3a8a; }
+        .font-sharp { font-family: 'Stick', sans-serif; color: #000000; }
+        .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #475569; }
         #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
