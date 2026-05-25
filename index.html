@@ -6,7 +6,6 @@
     <title>Psychology Experiment</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <!-- M PLUS Rounded 1c (丸)、Stick (角)、Noto Sans JP (中立ゴシック) を読み込み -->
     <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@900&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
@@ -20,12 +19,10 @@
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        
-        /* フォントのクラス設定 */
         .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 900; color: #1e293b; }
         .font-sharp { font-family: 'Stick', sans-serif; color: #0f172a; }
         .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #334155; }
-        
+        #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -34,7 +31,6 @@
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
 
     <div id="experiment-container">
-        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -44,7 +40,6 @@
             </div>
         </div>
 
-        <!-- 導入画面 -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
@@ -52,7 +47,6 @@
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
 
-        <!-- メイン画面 -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
@@ -61,10 +55,11 @@
             </div>
         </div>
 
-        <!-- 終了画面 -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
+            <p style="font-size: 1.1rem; color: #666; margin-top: 40px;">【管理者用データ】以下の枠内のテキストをコピーして保存してください：</p>
+            <textarea id="data-box" readonly onclick="this.select()"></textarea>
         </div>
     </div>
 
@@ -101,7 +96,6 @@
             document.getElementById('choice-sharp').innerText = d.sharp;
             document.getElementById('end-title').innerText = d.endT;
             document.getElementById('end-desc').innerText = d.endD;
-
             document.getElementById('lang-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         }
@@ -117,7 +111,6 @@
         function setupTrials() {
             const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
             let round_sharp_pool = [], sharp_round_pool = [], normal_pool = [];      
-
             filtered.forEach(w => {
                 fonts.forEach(f => {
                     const item = { ...w, font: f };
@@ -126,16 +119,12 @@
                     else { normal_pool.push(item); }
                 });
             });
-
             shuffle(round_sharp_pool); shuffle(sharp_round_pool); shuffle(normal_pool);
-
             let selectedTrials = [];
             selectedTrials.push(round_sharp_pool.pop()); selectedTrials.push(round_sharp_pool.pop());
             selectedTrials.push(sharp_round_pool.pop()); selectedTrials.push(sharp_round_pool.pop());
-
             let remainsPool = [...normal_pool, ...round_sharp_pool, ...sharp_round_pool];
             shuffle(remainsPool);
-
             for (let i = 0; i < 11; i++) { selectedTrials.push(remainsPool.pop()); }
             trials = shuffle(selectedTrials);
         }
@@ -150,37 +139,43 @@
 
         function nextTrial() {
             if (currentTrialIndex >= trials.length) {
-                document.getElementById('trial-screen').classList.add('hidden');
-                document.getElementById('counter').classList.add('hidden');
-                document.getElementById('end-screen').classList.remove('hidden');
+                showResults();
                 return;
             }
             document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
             const t = trials[currentTrialIndex];
             const el = document.getElementById('stimulus');
-            
-            // 文字の中身と、フォントの種類（クラス）を同時に切り替えます
             el.innerText = t.text;
             el.className = t.font; 
-            
             startTime = performance.now();
         }
 
         function handleResponse(res) {
             const rt = performance.now() - startTime;
+            let fontName = "ゴシック";
+            if(trials[currentTrialIndex].font === "font-round") fontName = "丸フォント";
+            if(trials[currentTrialIndex].font === "font-sharp") fontName = "Stickフォント";
+            let responseName = res === "round" ? "丸い" : "角ばった";
             results.push({
-                lang: selectedLang,
                 word: trials[currentTrialIndex].text,
-                font: trials[currentTrialIndex].font,
-                response: res,
-                rt: Math.round(rt)
+                font: fontName,
+                response: responseName,
+                rt: Math.round(rt) + "ms"
             });
             currentTrialIndex++;
             nextTrial();
         }
+
+        function showResults() {
+            document.getElementById('trial-screen').classList.add('hidden');
+            document.getElementById('counter').classList.add('hidden');
+            document.getElementById('end-screen').classList.remove('hidden');
+            const t = String.fromCharCode(9);
+            const n = String.fromCharCode(10);
+            let o = "単語" + t + "フォント" + t + "回答" + t + "反応時間" + n;
+            results.forEach(r => { o += r.word + t + r.font + t + r.response + t + r.rt + n; });
+            document.getElementById('data-box').value = o;
+        }
     </script>
 </body>
 </html>
-
-
-
