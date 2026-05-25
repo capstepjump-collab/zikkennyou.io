@@ -23,7 +23,6 @@
 <body>
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
     <div id="experiment-container">
-        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -32,14 +31,12 @@
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
-        <!-- 導入画面 -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
-        <!-- メイン画面（画像のみを表示する構造） -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus-container">
                 <img id="stimulus-img" src="" alt="stimulus">
@@ -49,16 +46,14 @@
                 <button class="btn" id="choice-sharp" onclick="handleResponse('sharp')"></button>
             </div>
         </div>
-        <!-- 終了画面 -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
-            <p style="font-size: 1.1rem; color: #666; margin-top: 40px;">【管理者用データ】以下の枠内のテキストをコピーして保存してください：</p>
+            <p style="font-size: 1.1rem; color: #666; margin-top: 40px;">【バックアップ用】送信エラーが起きた場合は、以下のテキストをコピーしてください：</p>
             <textarea id="data-box" readonly onclick="this.select()"></textarea>
         </div>
     </div>
     <script>
-        // 💡 記号（○○○、×××）を完全に排除し、24枚の単語画像だけで構成しました
         const stimuliWords = [
             { text: 'ブーバ', type: 'round', lang: 'ja', fileBase: 'booba' },
             { text: 'マロ', type: 'round', lang: 'ja', fileBase: 'maro' },
@@ -80,8 +75,8 @@
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
         const textData = {
-            ja: { counter: "残り", title: "実験開始", d1: "表示される文字が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。" },
-            en: { counter: "Remaining", title: "Experiment Start", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Start", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Thank you for your cooperation." }
+            ja: { counter: "残り", title: "実験開始", d1: "表示される文字が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "データをスプレッドシートに送信中...少々お待ちください。" },
+            en: { counter: "Remaining", title: "Experiment Start", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Start", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Sending data to the spreadsheet... please wait." }
         };
         function selectLanguage(lang) {
             selectedLang = lang;
@@ -119,10 +114,8 @@
             });
             shuffle(round_sharp_pool); shuffle(sharp_round_pool); shuffle(normal_pool);
             let selectedTrials = [];
-            // 矛盾条件を2問ずつ確定選出
             selectedTrials.push(round_sharp_pool.pop()); selectedTrials.push(round_sharp_pool.pop());
             selectedTrials.push(sharp_round_pool.pop()); selectedTrials.push(sharp_round_pool.pop());
-            // 残りの11問枠にナチュラル（中立）を含む残りのプールを補充
             let remainsPool = [...normal_pool, ...round_sharp_pool, ...sharp_round_pool];
             shuffle(remainsPool);
             for (let i = 0; i < 11; i++) { selectedTrials.push(remainsPool.pop()); }
@@ -137,7 +130,7 @@
         }
         function nextTrial() {
             if (currentTrialIndex >= trials.length) {
-                showResults();
+                endExperiment();
                 return;
             }
             document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
@@ -147,12 +140,9 @@
         }
         function handleResponse(res) {
             const rt = performance.now() - startTime;
-            
-            // 💡 管理者用データに表示されるフォント名を綺麗に翻訳して整理しました
             let fontName = "ナチュラル";
             if(trials[currentTrialIndex].font === "round") fontName = "丸フォント";
             if(trials[currentTrialIndex].font === "sharp") fontName = "Stickフォント";
-            
             let responseName = res === "round" ? "丸い" : "角ばった";
             results.push({
                 word: trials[currentTrialIndex].text,
@@ -163,15 +153,33 @@
             currentTrialIndex++;
             nextTrial();
         }
-        function showResults() {
+        function endExperiment() {
             document.getElementById('trial-screen').classList.add('hidden');
             document.getElementById('counter').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
-            const t = String.fromCharCode(9);
-            const n = String.fromCharCode(10);
-            let o = "単語" + t + "フォント" + t + "回答" + t + "反応時間" + n;
-            results.forEach(r => { o += r.word + t + r.font + t + r.response + t + r.rt + n; });
-            document.getElementById('data-box').value = o;
+            const myTab = String.fromCharCode(9);
+            const myNewline = String.fromCharCode(10);
+            let backupText = "単語" + myTab + "フォント" + myTab + "回答" + myTab + "反応時間" + myNewline;
+            results.forEach(r => { backupText += r.word + myTab + r.font + myTab + r.response + myTab + r.rt + myNewline; });
+            document.getElementById('data-box').value = backupText;
+            const uid = "id_" + Date.now();
+            const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
+            
+            // ⚠️ 以下のURLをご自身のGASの長いURLに書き換えてください！
+            const gasUrl = "ここにコピーしたウェブアプリのURLを貼り付けてください"; 
+            
+            if (gasUrl !== "ここに" + "コピーしたウェブアプリのURLを貼り付けてください") {
+                fetch(gasUrl, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dataToSend)
+                }).then(() => {
+                    document.getElementById('end-desc').innerText = selectedLang === 'ja' ? "ご協力ありがとうございました。" : "Thank you for your cooperation.";
+                }).catch(() => {
+                    document.getElementById('end-desc').innerText = selectedLang === 'ja' ? "送信エラーが発生しました。下のテキストを保存してください。" : "Submission error. Please save the text below.";
+                });
+            }
         }
     </script>
 </body>
