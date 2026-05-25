@@ -4,26 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychology Experiment</title>
-    <!-- 100%確実に読み込める最新の公式アドレスです -->
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
         p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
-        #stimulus { font-size: clamp(60px, 10vw, 130px); margin-bottom: 70px; min-height: 240px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        /* 💡 刺激語エリアを画像（縦横最大350pxの正方形）に最適化しました */
+        #stimulus-container { width: 100%; min-height: 350px; margin-bottom: 50px; display: flex; align-items: center; justify-content: center; }
+        #stimulus-img { max-width: 350px; max-height: 350px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+        
         .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        
-        /* 指定されたフォント名を公式の登録名と100%完全に一致させました */
-        .font-round { font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; color: #1e3a8a; }
-        .font-sharp { font-family: "Stick", sans-serif; color: #000000; }
-        .font-neutral { font-family: "Noto Sans JP", sans-serif; font-weight: 500; color: #64748b; }
         
         #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
@@ -32,6 +26,7 @@
 <body>
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
     <div id="experiment-container">
+        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -40,19 +35,24 @@
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
+        <!-- 導入画面 -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
+        <!-- メイン画面（文字ではなく画像を表示する構造に変更） -->
         <div id="trial-screen" class="hidden">
-            <div id="stimulus"></div>
+            <div id="stimulus-container">
+                <img id="stimulus-img" src="" alt="stimulus">
+            </div>
             <div class="button-container">
-                <button class="btn font-round" id="choice-round" onclick="handleResponse('round')"></button>
-                <button class="btn font-sharp" id="choice-sharp" onclick="handleResponse('sharp')"></button>
+                <button class="btn" id="choice-round" onclick="handleResponse('round')"></button>
+                <button class="btn" id="choice-sharp" onclick="handleResponse('sharp')"></button>
             </div>
         </div>
+        <!-- 終了画面 -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
@@ -61,18 +61,28 @@
         </div>
     </div>
     <script>
+        // あなたの画像ファイル名（文字_フォント形式.png）と完全連動させました
         const stimuliWords = [
-            { text: 'ブーバ', type: 'round', lang: 'ja' }, { text: 'マロ', type: 'round', lang: 'ja' },
-            { text: 'ルル', type: 'round', lang: 'ja' }, { text: 'モコ', type: 'round', lang: 'ja' },
-            { text: 'キキ', type: 'sharp', lang: 'ja' }, { text: 'タケテ', type: 'sharp', lang: 'ja' },
-            { text: 'カキ', type: 'sharp', lang: 'ja' }, { text: 'トゲ', type: 'sharp', lang: 'ja' },
-            { text: 'Bouba', type: 'round', lang: 'en' }, { text: 'Malo', type: 'round', lang: 'en' },
-            { text: 'Lulu', type: 'round', lang: 'en' }, { text: 'Moko', type: 'round', lang: 'en' },
-            { text: 'Kiki', type: 'sharp', lang: 'en' }, { text: 'Takete', type: 'sharp', lang: 'en' },
-            { text: 'Kaki', type: 'sharp', lang: 'en' }, { text: 'Toge', type: 'sharp', lang: 'en' },
-            { text: '○○○', type: 'round', lang: 'both' }, { text: '×××', type: 'sharp', lang: 'both' }
+            { text: 'ブーバ', type: 'round', lang: 'ja', fileBase: 'booba' },
+            { text: 'マロ', type: 'round', lang: 'ja', fileBase: 'maro' },
+            { text: 'ルル', type: 'round', lang: 'ja', fileBase: 'lulu' },
+            { text: 'モコ', type: 'round', lang: 'ja', fileBase: 'moko' },
+            { text: 'キキ', type: 'sharp', lang: 'ja', fileBase: 'kiki' },
+            { text: 'タケテ', type: 'sharp', lang: 'ja', fileBase: 'takete' },
+            { text: 'カキ', type: 'sharp', lang: 'ja', fileBase: 'kaki' },
+            { text: 'トゲ', type: 'sharp', lang: 'ja', fileBase: 'toge' },
+            { text: 'Bouba', type: 'round', lang: 'en', fileBase: 'booba' },
+            { text: 'Malo', type: 'round', lang: 'en', fileBase: 'malo' },
+            { text: 'Lulu', type: 'round', lang: 'en', fileBase: 'lulu' },
+            { text: 'Moko', type: 'round', lang: 'en', fileBase: 'moko' },
+            { text: 'Kiki', type: 'sharp', lang: 'en', fileBase: 'kiki' },
+            { text: 'Takete', type: 'sharp', lang: 'en', fileBase: 'takete' },
+            { text: 'Kaki', type: 'sharp', lang: 'en', fileBase: 'kaki' },
+            { text: 'Toge', type: 'sharp', lang: 'en', fileBase: 'toge' },
+            { text: '○○○', type: 'round', lang: 'both', fileBase: 'maru_symbol' },
+            { text: '×××', type: 'sharp', lang: 'both', fileBase: 'batsu_symbol' }
         ];
-        const fonts = ['font-round', 'font-sharp', 'font-neutral'];
+        const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
         const textData = {
             ja: { counter: "残り", title: "実験開始", d1: "表示される文字が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。" },
@@ -105,10 +115,17 @@
             let round_sharp_pool = [], sharp_round_pool = [], normal_pool = [];      
             filtered.forEach(w => {
                 fonts.forEach(f => {
-                    const item = { ...w, font: f };
-                    if (w.type === 'round' && f === 'font-sharp') { round_sharp_pool.push(item); } 
-                    else if (w.type === 'sharp' && f === 'font-round') { sharp_round_pool.push(item); } 
-                    else { normal_pool.push(item); }
+                    // 記号（both）の場合はフォントを固定して読み込む特殊処理
+                    if (w.lang === 'both') {
+                        if (w.fileBase === 'maru_symbol' && f === 'round') { normal_pool.push({ ...w, font: f, imgPath: 'images/maru_symbol.png' }); }
+                        if (w.fileBase === 'batsu_symbol' && f === 'sharp') { normal_pool.push({ ...w, font: f, imgPath: 'images/batsu_symbol.png' }); }
+                    } else {
+                        const path = 'images/' + w.fileBase + '_' + f + '.png';
+                        const item = { ...w, font: f, imgPath: path };
+                        if (w.type === 'round' && f === 'sharp') { round_sharp_pool.push(item); } 
+                        else if (w.type === 'sharp' && f === 'round') { sharp_round_pool.push(item); } 
+                        else { normal_pool.push(item); }
+                    }
                 });
             });
             shuffle(round_sharp_pool); shuffle(sharp_round_pool); shuffle(normal_pool);
@@ -134,16 +151,17 @@
             }
             document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
             const t = trials[currentTrialIndex];
-            const el = document.getElementById('stimulus');
-            el.innerText = t.text;
-            el.className = t.font; 
+            
+            // 💡 画面の<img>要素に、対応する画像のパスを流し込みます
+            document.getElementById('stimulus-img').src = t.imgPath;
+            
             startTime = performance.now();
         }
         function handleResponse(res) {
             const rt = performance.now() - startTime;
             let fontName = "ゴシック";
-            if(trials[currentTrialIndex].font === "font-round") fontName = "丸フォント";
-            if(trials[currentTrialIndex].font === "font-sharp") fontName = "Stickフォント";
+            if(trials[currentTrialIndex].font === "round") fontName = "丸フォント";
+            if(trials[currentTrialIndex].font === "sharp") fontName = "Stickフォント";
             let responseName = res === "round" ? "丸い" : "角ばった";
             results.push({
                 word: trials[currentTrialIndex].text,
