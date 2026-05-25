@@ -1,0 +1,155 @@
+    /* 残り質問数の表示 */
+    #counter {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 1.2rem;
+        color: #666;
+    }
+
+    #experiment-container {
+        text-align: center;
+    }
+
+    /* 刺激語のスタイル */
+    #stimulus {
+        font-size: 80px;
+        margin-bottom: 50px;
+        min-height: 120px;
+    }
+
+    /* 回答ボタンのスタイル */
+    .button-container {
+        display: flex;
+        gap: 40px;
+    }
+
+    .btn {
+        padding: 20px 40px;
+        font-size: 24px;
+        cursor: pointer;
+        border: none;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: transform 0.1s;
+    }
+
+    .btn:active {
+        transform: scale(0.95);
+    }
+
+    /* フォント指定 */
+    .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; }
+    .font-sharp { font-family: 'Stick', sans-serif; }
+
+    .hidden { display: none; }
+</style>
+<div id="counter">残り: <span id="remaining">15</span></div>
+
+<div id="experiment-container">
+    <!-- 導入画面 -->
+    <div id="start-screen">
+        <h1>実験開始</h1>
+        <p>表示される文字が「丸い」か「角ばっている」か判断してください。</p>
+        <p>できるだけ<strong>速く、正確に</strong>ボタンを押してください。</p>
+        <button class="btn" onclick="startExperiment()">開始する</button>
+    </div>
+
+    <!-- 実験メイン画面 -->
+    <div id="trial-screen" class="hidden">
+        <div id="stimulus"></div>
+        <div class="button-container">
+            <button class="btn font-round" onclick="handleResponse('round')">丸い</button>
+            <button class="btn font-sharp" onclick="handleResponse('sharp')">角ばった</button>
+        </div>
+    </div>
+
+    <!-- 終了画面 -->
+    <div id="end-screen" class="hidden">
+        <h1>実験終了</h1>
+        <p>ご協力ありがとうございました。</p>
+    </div>
+</div>
+
+<script>
+    // 実験データの設定
+    const stimuliWords = [
+        { text: 'ブーバ', type: 'round' }, { text: 'Bouba', type: 'round' },
+        { text: 'マロ', type: 'round' }, { text: 'Malo', type: 'round' },
+        { text: 'ルル', type: 'round' },
+        { text: 'キキ', type: 'sharp' }, { text: 'Kiki', type: 'sharp' },
+        { text: 'タケテ', type: 'sharp' }, { text: 'Takete', type: 'sharp' },
+        { text: 'カキ', type: 'sharp' },
+        { text: '○○○', type: 'round' }, { text: '×××', type: 'sharp' }
+    ];
+
+    const fonts = ['font-round', 'font-sharp'];
+    let trials = [];
+    let currentTrialIndex = 0;
+    let startTime;
+    let results = [];
+
+    // 15問の試行を作成（ランダム）
+    function setupTrials() {
+        for (let i = 0; i < 15; i++) {
+            const word = stimuliWords[Math.floor(Math.random() * stimuliWords.length)];
+            const font = fonts[Math.floor(Math.random() * fonts.length)];
+            trials.push({ ...word, font: font });
+        }
+    }
+
+    function startExperiment() {
+        setupTrials();
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('trial-screen').classList.remove('hidden');
+        nextTrial();
+    }
+
+    function nextTrial() {
+        if (currentTrialIndex >= trials.length) {
+            endExperiment();
+            return;
+        }
+        
+        document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
+        const stimulusElement = document.getElementById('stimulus');
+        const trial = trials[currentTrialIndex];
+        
+        stimulusElement.innerText = trial.text;
+        stimulusElement.className = trial.font;
+        
+        startTime = performance.now();
+    }
+
+    function handleResponse(response) {
+        const endTime = performance.now();
+        const reactionTime = endTime - startTime;
+
+        // 異常値判定：250ms以下は「早すぎ」としてフラグを立てる
+        const isTooFast = reactionTime < 250;
+
+        const trialResult = {
+            word: trials[currentTrialIndex].text,
+            font: trials[currentTrialIndex].font,
+            response: response,
+            correct: trials[currentTrialIndex].type === response,
+            rt: reactionTime,
+            tooFast: isTooFast
+        };
+
+        results.push(trialResult);
+        console.log(trialResult); // デバッグ用にコンソールに表示
+
+        currentTrialIndex++;
+        nextTrial();
+    }
+
+    function endExperiment() {
+        document.getElementById('trial-screen').classList.add('hidden');
+        document.getElementById('counter').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        
+        // ここでGASに結果を送信する処理を後ほど追加可能
+    }
+</script>
