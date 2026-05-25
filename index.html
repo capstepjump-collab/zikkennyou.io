@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychology Experiment</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <!-- 太さを公式規格の800に修正して読み込みます -->
+    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@800&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
-        /* HTMLではなくCSSの中で確実にフォントを強制読み込みします */
-        @import url('https://googleapis.com');
-
-        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
-        body { display: flex; justify-content: center; align-items: center; position: relative; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
         #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
@@ -20,19 +20,17 @@
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
         
-        /* 変化が分かりやすいよう、フォントごとに色もわずかに変えています */
-        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 900; color: #1e3a8a; } /* 丸：濃いネイビー */
-        .font-sharp { font-family: 'Stick', sans-serif; color: #000000; } /* 角：漆黒 */
-        .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #64748b; } /* 中立：グレー */
+        /* 認識を確実にするため、フォント名を二重引用符で囲いました */
+        .font-round { font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; color: #1e3a8a; }
+        .font-sharp { font-family: "Stick", sans-serif; color: #000000; }
+        .font-neutral { font-family: "Noto Sans JP", sans-serif; font-weight: 500; color: #64748b; }
         
         #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
-
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
-
     <div id="experiment-container">
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
@@ -42,14 +40,12 @@
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
-
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
-
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
@@ -57,7 +53,6 @@
                 <button class="btn font-sharp" id="choice-sharp" onclick="handleResponse('sharp')"></button>
             </div>
         </div>
-
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
@@ -77,15 +72,12 @@
             { text: 'Kaki', type: 'sharp', lang: 'en' }, { text: 'Toge', type: 'sharp', lang: 'en' },
             { text: '○○○', type: 'round', lang: 'both' }, { text: '×××', type: 'sharp', lang: 'both' }
         ];
-
         const fonts = ['font-round', 'font-sharp', 'font-neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
-
         const textData = {
             ja: { counter: "残り", title: "実験開始", d1: "表示される文字が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。" },
             en: { counter: "Remaining", title: "Experiment Start", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Start", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Thank you for your cooperation." }
         };
-
         function selectLanguage(lang) {
             selectedLang = lang;
             const d = textData[lang];
@@ -101,7 +93,6 @@
             document.getElementById('lang-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         }
-
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -109,7 +100,6 @@
             }
             return array;
         }
-
         function setupTrials() {
             const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
             let round_sharp_pool = [], sharp_round_pool = [], normal_pool = [];      
@@ -130,7 +120,6 @@
             for (let i = 0; i < 11; i++) { selectedTrials.push(remainsPool.pop()); }
             trials = shuffle(selectedTrials);
         }
-
         function startExperiment() {
             setupTrials();
             document.getElementById('start-screen').classList.add('hidden');
@@ -138,7 +127,6 @@
             document.getElementById('trial-screen').classList.remove('hidden');
             nextTrial();
         }
-
         function nextTrial() {
             if (currentTrialIndex >= trials.length) {
                 showResults();
@@ -151,7 +139,6 @@
             el.className = t.font; 
             startTime = performance.now();
         }
-
         function handleResponse(res) {
             const rt = performance.now() - startTime;
             let fontName = "ゴシック";
@@ -167,7 +154,6 @@
             currentTrialIndex++;
             nextTrial();
         }
-
         function showResults() {
             document.getElementById('trial-screen').classList.add('hidden');
             document.getElementById('counter').classList.add('hidden');
