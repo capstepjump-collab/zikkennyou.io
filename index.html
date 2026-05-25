@@ -6,30 +6,27 @@
     <title>Psychology Experiment</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <!-- M PLUS Rounded 1c (丸)、Stick (角)、Noto Sans JP (中立ゴシック) を読み込み -->
+    <!-- 正しいGoogle Fontsの読み込みURLに修正しました -->
     <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@900&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
         body { display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
-        #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; }
+        #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; box-sizing: border-box; }
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
         p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
         
-        #stimulus { font-size: 130px; margin-bottom: 70px; min-height: 240px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        /* スマホ等での画面はみ出しを防ぐため、最大サイズを調整 */
+        #stimulus { font-size: clamp(60px, 10vw, 130px); margin-bottom: 70px; min-height: 240px; display: flex; align-items: center; justify-content: center; user-select: none; }
         
-        .button-container { display: flex; justify-content: center; gap: 50px; }
+        .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
         
-        /* 【丸：M PLUS Rounded 1c】 */
+        /* フォント名の指定をGoogle Fontsの正確な規約に合わせました */
         .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 900; color: #1e293b; }
-        
-        /* 【角：Stick】 */
         .font-sharp { font-family: 'Stick', sans-serif; color: #0f172a; }
-        
-        /* 【中立：Noto Sans JP (標準ゴシック)】 */
         .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #334155; }
         
         .hidden { display: none !important; }
@@ -58,7 +55,7 @@
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
 
-        <!-- メメイン画面 -->
+        <!-- メイン画面 -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
@@ -87,7 +84,6 @@
             { text: '○○○', type: 'round', lang: 'both' }, { text: '×××', type: 'sharp', lang: 'both' }
         ];
 
-        // 3つのフォントを定義
         const fonts = ['font-round', 'font-sharp', 'font-neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
 
@@ -113,7 +109,6 @@
             document.getElementById('start-screen').classList.remove('hidden');
         }
 
-        // 配列をシャッフルする共通関数
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -125,10 +120,9 @@
         function setupTrials() {
             const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
 
-            // 1. 確定条件スロットを用意
-            let round_sharp_pool = []; // 丸文字 × 角フォント
-            let sharp_round_pool = []; // 角文字 × 丸フォント
-            let normal_pool = [];      // それ以外の組み合わせ
+            let round_sharp_pool = []; 
+            let sharp_round_pool = []; 
+            let normal_pool = [];      
 
             filtered.forEach(w => {
                 fonts.forEach(f => {
@@ -143,20 +137,16 @@
                 });
             });
 
-            // それぞれをシャッフル
             shuffle(round_sharp_pool);
             shuffle(sharp_round_pool);
             shuffle(normal_pool);
 
-            // 2. 確定枠を2つずつ取り出す
             let selectedTrials = [];
             selectedTrials.push(round_sharp_pool.pop());
             selectedTrials.push(round_sharp_pool.pop());
             selectedTrials.push(sharp_round_pool.pop());
             selectedTrials.push(sharp_round_pool.pop());
 
-            // 3. 残りの11問枠を、使わなかった全てのカードから補充（重複なし）
-            // 確定枠で余ったカードも通常プールに合流させる
             let remainsPool = [...normal_pool, ...round_sharp_pool, ...sharp_round_pool];
             shuffle(remainsPool);
 
@@ -164,7 +154,6 @@
                 selectedTrials.push(remainsPool.pop());
             }
 
-            // 4. 最終的な15問（確定枠4つ + ランダム11実）をさらにシャッフルして出題順をバラバラにする
             trials = shuffle(selectedTrials);
         }
 
