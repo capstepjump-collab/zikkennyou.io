@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Psychology Experiment</title>
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@900&family=Noto+Sans+JP:wght@500&family=Stick&display=swap" rel="stylesheet">
     <style>
+        /* HTMLではなくCSSの中で確実にフォントを強制読み込みします */
+        @import url('https://googleapis.com');
+
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
         body { display: flex; justify-content: center; align-items: center; position: relative; }
         #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
@@ -19,9 +19,12 @@
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 900; color: #1e293b; }
-        .font-sharp { font-family: 'Stick', sans-serif; color: #0f172a; }
-        .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #334155; }
+        
+        /* 変化が分かりやすいよう、フォントごとに色もわずかに変えています */
+        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 900; color: #1e3a8a; } /* 丸：濃いネイビー */
+        .font-sharp { font-family: 'Stick', sans-serif; color: #000000; } /* 角：漆黒 */
+        .font-neutral { font-family: 'Noto Sans JP', sans-serif; font-weight: 500; color: #64748b; } /* 中立：グレー */
+        
         #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
@@ -62,7 +65,6 @@
             <textarea id="data-box" readonly onclick="this.select()"></textarea>
         </div>
     </div>
-
     <script>
         const stimuliWords = [
             { text: 'ブーバ', type: 'round', lang: 'ja' }, { text: 'マロ', type: 'round', lang: 'ja' },
