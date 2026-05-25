@@ -6,8 +6,8 @@
     <title>Psychology Experiment</title>
     <link rel="preconnect" href="https://googleapis.com">
     <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <!-- より丸いZen Maru Gothicと、トゲトゲしたStickを読み込み -->
-    <link href="https://googleapis.com/css2?family=Stick&family=Zen+Maru+Gothic:wght@900&display=swap" rel="stylesheet">
+    <!-- デザイン重視の「Dela Gothic One」と「Orbitron」を読み込み -->
+    <link href="https://googleapis.com/css2?family=Dela+Gothic+One&family=Orbitron:wght@900&display=swap" rel="stylesheet">
     <style>
         html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
         body { display: flex; justify-content: center; align-items: center; position: relative; }
@@ -16,26 +16,26 @@
         h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
         p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
         
-        /* 刺激語のスタイル：サイズを少し大きくし、フォントの違いが瞬時に脳に刺さるように調整 */
-        #stimulus { font-size: 140px; margin-bottom: 70px; min-height: 220px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        /* 刺激語エリア：フォント個性が引き立つよう高さをしっかり確保 */
+        #stimulus { font-size: 130px; margin-bottom: 70px; min-height: 240px; display: flex; align-items: center; justify-content: center; user-select: none; }
         
         .button-container { display: flex; justify-content: center; gap: 50px; }
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
         
-        /* 【極丸】圧倒的な太さと丸みを持たせる設定 */
+        /* 【丸：Dela Gothic One】ぽってりとした塊感のあるデザイン */
         .font-round { 
-            font-family: 'Zen Maru Gothic', sans-serif; 
-            font-weight: 900; 
-            color: #222;
+            font-family: 'Dela Gothic One', sans-serif; 
+            color: #1e293b;
         }
         
-        /* 【極角】Stickフォントに加え、輪郭をわずかに補正してトゲトゲしさを強調 */
+        /* 【角：Orbitron】SF感のある、近未来的で極度に角ばった幾何学デザイン */
         .font-sharp { 
-            font-family: 'Stick', sans-serif; 
-            color: #111;
-            text-shadow: 0.5px 0.5px 0px #111, -0.5px -0.5px 0px #111; /* 文字の線をよりシャープにエッジ立たせる */
+            font-family: 'Orbitron', sans-serif; 
+            font-weight: 900;
+            color: #0f172a;
+            letter-spacing: 4px;
         }
         
         .hidden { display: none !important; }
@@ -46,7 +46,7 @@
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
 
     <div id="experiment-container">
-        <!-- １．言語選択画面 -->
+        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -64,7 +64,7 @@
             <button class="btn" id="start-btn" onclick="startExperiment()"></button>
         </div>
 
-        <!-- メイン画面（開始後に選択肢が出現） -->
+        <!-- メイン画面 -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus"></div>
             <div class="button-container">
