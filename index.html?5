@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psychology Experiment</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
+    <style>
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #f0f2f5; font-family: sans-serif; }
+        body { display: flex; justify-content: center; align-items: center; position: relative; }
+        #counter { position: absolute; top: 30px; right: 40px; font-size: 1.8rem; font-weight: bold; color: #444; background: rgba(255,255,255,0.8); padding: 10px 20px; border-radius: 20px; }
+        #experiment-container { text-align: center; max-width: 900px; width: 90%; padding: 40px; }
+        h1 { font-size: 3rem; color: #222; margin-bottom: 30px; }
+        p { font-size: 1.5rem; color: #444; line-height: 1.8; margin-bottom: 20px; }
+        #stimulus { font-size: 130px; margin-bottom: 70px; min-height: 200px; display: flex; align-items: center; justify-content: center; user-select: none; }
+        .button-container { display: flex; justify-content: center; gap: 50px; }
+        .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
+        .btn:active { transform: scale(0.95); }
+        .lang-btn { background: #007bff; color: white; margin: 15px; }
+        .font-round { font-family: 'M PLUS Rounded 1c', sans-serif; font-weight: 700; }
+        .font-sharp { font-family: 'Stick', sans-serif; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
+
+    <div id="experiment-container">
+        <!-- １．言語選択画面 -->
+        <div id="lang-screen">
+            <h1>Language / 言語選択</h1>
+            <p>Please select your language.<br>言語を選択してください。</p>
+            <div class="button-container">
+                <button class="btn lang-btn" onclick="selectLanguage('ja')">日本語</button>
+                <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
+            </div>
+        </div>
+
+        <!-- 導入画面 -->
+        <div id="start-screen" class="hidden">
+            <h1 id="start-title"></h1>
+            <p id="start-desc1"></p>
+            <p id="start-desc2"></p>
+            <button class="btn" id="start-btn" onclick="startExperiment()"></button>
+        </div>
+
+        <!-- ３．メイン画面（開始後に選択肢が出現） -->
+        <div id="trial-screen" class="hidden">
+            <div id="stimulus"></div>
+            <div class="button-container">
+                <button class="btn font-round" id="choice-round" onclick="handleResponse('round')"></button>
+                <button class="btn font-sharp" id="choice-sharp" onclick="handleResponse('sharp')"></button>
+            </div>
+        </div>
+
+        <!-- 終了画面 -->
+        <div id="end-screen" class="hidden">
+            <h1 id="end-title"></h1>
+            <p id="end-desc"></p>
+        </div>
+    </div>
+
+    <script>
+        // 日本語・英語・共通（both）を明確に分離
+        const stimuliWords = [
+            { text: 'ブーバ', type: 'round', lang: 'ja' }, { text: 'マロ', type: 'round', lang: 'ja' },
+            { text: 'ルル', type: 'round', lang: 'ja' }, { text: 'モコ', type: 'round', lang: 'ja' },
+            { text: 'キキ', type: 'sharp', lang: 'ja' }, { text: 'タケテ', type: 'sharp', lang: 'ja' },
+            { text: 'カキ', type: 'sharp', lang: 'ja' }, { text: 'トゲ', type: 'sharp', lang: 'ja' },
+            { text: 'Bouba', type: 'round', lang: 'en' }, { text: 'Malo', type: 'round', lang: 'en' },
+            { text: 'Lulu', type: 'round', lang: 'en' }, { text: 'Moko', type: 'round', lang: 'en' },
+            { text: 'Kiki', type: 'sharp', lang: 'en' }, { text: 'Takete', type: 'sharp', lang: 'en' },
+            { text: 'Kaki', type: 'sharp', lang: 'en' }, { text: 'Toge', type: 'sharp', lang: 'en' },
+            { text: '○○○', type: 'round', lang: 'both' }, { text: '×××', type: 'sharp', lang: 'both' }
+        ];
+
+        const fonts = ['font-round', 'font-sharp'];
+        let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
+
+        const textData = {
+            ja: { counter: "残り", title: "実験開始", d1: "表示される文字が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。" },
+            en: { counter: "Remaining", title: "Experiment Start", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Start", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Thank you for your cooperation." }
+        };
+
+        function selectLanguage(lang) {
+            selectedLang = lang;
+            const d = textData[lang];
+            document.getElementById('counter-label').innerText = d.counter;
+            document.getElementById('start-title').innerText = d.title;
+            document.getElementById('start-desc1').innerHTML = d.d1;
+            document.getElementById('start-desc2').innerHTML = d.d2;
+            document.getElementById('start-btn').innerText = d.start;
+            document.getElementById('choice-round').innerText = d.round;
+            document.getElementById('choice-sharp').innerText = d.sharp;
+            document.getElementById('end-title').innerText = d.endT;
+            document.getElementById('end-desc').innerText = d.endD;
+
+            document.getElementById('lang-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        // ２．重複を完全に防ぎ、15問をランダム抽出する処理
+        function setupTrials() {
+            let pool = [];
+            const filtered = stimuliWords.filter(w => w.lang === selectedLang || w.lang === 'both');
+            filtered.forEach(w => {
+                fonts.forEach(f => { pool.push({ ...w, font: f }); });
+            });
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            trials = pool.slice(0, 15);
+        }
+
+        function startExperiment() {
+            setupTrials();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('counter').classList.remove('hidden');
+            document.getElementById('trial-screen').classList.remove('hidden');
+            nextTrial();
+        }
+
+        function nextTrial() {
+            if (currentTrialIndex >= trials.length) {
+                document.getElementById('trial-screen').classList.add('hidden');
+                document.getElementById('counter').classList.add('hidden');
+                document.getElementById('end-screen').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('remaining').innerText = trials.length - currentTrialIndex;
+            const t = trials[currentTrialIndex];
+            const el = document.getElementById('stimulus');
+            el.innerText = t.text;
+            el.className = t.font;
+            startTime = performance.now();
+        }
+
+        function handleResponse(res) {
+            const rt = performance.now() - startTime;
+            results.push({
+                lang: selectedLang,
+                word: trials[currentTrialIndex].text,
+                font: trials[currentTrialIndex].font,
+                response: res,
+                correct: trials[currentTrialIndex].type === res,
+                rt: rt,
+                tooFast: rt < 250
+            });
+            currentTrialIndex++;
+            nextTrial();
+        }
+    </script>
+</body>
+</html>
