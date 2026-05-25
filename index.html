@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>心理学実験 / Psychology Experiment</title>
     
-    <!-- Google Fontsの読み込み -->
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
+    <!-- Google Fontsの読み込み（エラーの起きない正しいアドレスに修正しました） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@700&family=Stick&display=swap" rel="stylesheet">
 
     <style>
         html, body {
@@ -152,19 +152,32 @@
         </div>
     </div>
 
-    <!-- ここから下のJavaScriptが削られずに残っているか確認してください -->
     <script>
+        // 単語データに「言語属性 (lang)」を追加しました
         const stimuliWords = [
-            { text: 'ブーバ', type: 'round' }, { text: 'Bouba', type: 'round' },
-            { text: 'マロ', type: 'round' }, { text: 'Malo', type: 'round' },
-            { text: 'ルル', type: 'round' }, { text: 'Lulu', type: 'round' },
-            { text: 'モコ', type: 'round' }, { text: 'Moko', type: 'round' },
-            { text: '○○○', type: 'round' },
-            { text: 'キキ', type: 'sharp' }, { text: 'Kiki', type: 'sharp' },
-            { text: 'タケテ', type: 'sharp' }, { text: 'Takete', type: 'sharp' },
-            { text: 'カキ', type: 'sharp' }, { text: 'Kaki', type: 'sharp' },
-            { text: 'トゲ', type: 'sharp' }, { text: 'Toge', type: 'sharp' },
-            { text: '×××', type: 'sharp' }
+            // 日本語用の単語
+            { text: 'ブーバ', type: 'round', lang: 'ja' },
+            { text: 'マロ', type: 'round', lang: 'ja' },
+            { text: 'ルル', type: 'round', lang: 'ja' },
+            { text: 'モコ', type: 'round', lang: 'ja' },
+            { text: 'キキ', type: 'sharp', lang: 'ja' },
+            { text: 'タケテ', type: 'sharp', lang: 'ja' },
+            { text: 'カキ', type: 'sharp', lang: 'ja' },
+            { text: 'トゲ', type: 'sharp', lang: 'ja' },
+
+            // 英語圏用の単語
+            { text: 'Bouba', type: 'round', lang: 'en' },
+            { text: 'Malo', type: 'round', lang: 'en' },
+            { text: 'Lulu', type: 'round', lang: 'en' },
+            { text: 'Moko', type: 'round', lang: 'en' },
+            { text: 'Kiki', type: 'sharp', lang: 'en' },
+            { text: 'Takete', type: 'sharp', lang: 'en' },
+            { text: 'Kaki', type: 'sharp', lang: 'en' },
+            { text: 'Toge', type: 'sharp', lang: 'en' },
+
+            // 両言語共通の記号
+            { text: '○○○', type: 'round', lang: 'both' },
+            { text: '×××', type: 'sharp', lang: 'both' }
         ];
 
         const fonts = ['font-round', 'font-sharp'];
@@ -219,17 +232,24 @@
 
         function setupTrials() {
             let pool = [];
-            stimuliWords.forEach(word => {
+            
+            // 選択された言語、または「両方(both)」に該当する単語だけを抽出
+            const filteredWords = stimuliWords.filter(word => word.lang === selectedLang || word.lang === 'both');
+
+            // 抽出した単語とフォントの全組み合わせ（計20通り）をプールに作成
+            filteredWords.forEach(word => {
                 fonts.forEach(font => {
                     pool.push({ ...word, font: font });
                 });
             });
 
+            // 完全シャフル（フィッシャー–イェーツのシャッフル）
             for (let i = pool.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [pool[i], pool[j]] = [pool[j], pool[i]];
             }
 
+            // シャッフルされた中から先頭の15問を今回の実験に採用（これで重複もしません）
             trials = pool.slice(0, 15);
         }
 
@@ -265,25 +285,3 @@
             const trialResult = {
                 lang: selectedLang,
                 word: trials[currentTrialIndex].text,
-                font: trials[currentTrialIndex].font,
-                response: response,
-                correct: trials[currentTrialIndex].type === response,
-                rt: reactionTime,
-                tooFast: isTooFast
-            };
-
-            results.push(trialResult);
-            console.log(trialResult);
-
-            currentTrialIndex++;
-            nextTrial();
-        }
-
-        function endExperiment() {
-            document.getElementById('trial-screen').classList.add('hidden');
-            document.getElementById('counter').classList.add('hidden');
-            document.getElementById('end-screen').classList.remove('hidden');
-        }
-    </script>
-</body>
-</html>
