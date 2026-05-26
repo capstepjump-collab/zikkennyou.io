@@ -13,12 +13,9 @@
         #stimulus-container { width: 100%; min-height: 350px; margin-bottom: 50px; display: flex; align-items: center; justify-content: center; }
         #stimulus-img { max-width: 350px; max-height: 350px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
         .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
-        
-        /* 💡 回答ボタンを大きな図形記号に最適化しました */
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
-        .trial-btn { font-size: 4rem; padding: 20px 80px; min-width: 240px; } /* 実験時のボタンを特大化 */
-        
+        .trial-btn { font-size: 4rem; padding: 20px 80px; min-width: 240px; }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
         .hidden { display: none !important; }
     </style>
@@ -26,7 +23,6 @@
 <body>
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
     <div id="experiment-container">
-        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
             <p>Please select your language.<br>言語を選択してください。</p>
@@ -35,20 +31,17 @@
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
-        <!-- 導入画面（教示文を徹底的に明確化） -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
             <button class="btn" id="start-btn" onclick="goToReadyScreen()"></button>
         </div>
-        <!-- 心の準備画面 -->
         <div id="ready-screen" class="hidden">
             <h1 id="ready-title"></h1>
             <p id="ready-desc"></p>
             <button class="btn" id="ready-btn" onclick="startExperiment()"></button>
         </div>
-        <!-- メイン画面（直感的な図形記号のボタンに変更） -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus-container">
                 <img id="stimulus-img" src="" alt="stimulus">
@@ -58,7 +51,6 @@
                 <button class="btn trial-btn" id="choice-sharp" onclick="handleResponse('sharp')">♢</button>
             </div>
         </div>
-        <!-- 終了画面 -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
@@ -66,27 +58,17 @@
     </div>
     <script>
         const stimuliWords = [
-            { text: 'ブーバ', type: 'round', lang: 'ja', fileBase: 'booba' },
-            { text: 'マロ', type: 'round', lang: 'ja', fileBase: 'maro' },
-            { text: 'ルル', type: 'round', lang: 'ja', fileBase: 'lulu' },
-            { text: 'モコ', type: 'round', lang: 'ja', fileBase: 'moko' },
-            { text: 'キキ', type: 'sharp', lang: 'ja', fileBase: 'kiki' },
-            { text: 'タケテ', type: 'sharp', lang: 'ja', fileBase: 'takete' },
-            { text: 'カキ', type: 'sharp', lang: 'ja', fileBase: 'kaki' },
-            { text: 'トゲ', type: 'sharp', lang: 'ja', fileBase: 'toge' },
-            { text: 'Bouba', type: 'round', lang: 'en', fileBase: 'booba' },
-            { text: 'Malo', type: 'round', lang: 'en', fileBase: 'malo' },
-            { text: 'Lulu', type: 'round', lang: 'en', fileBase: 'lulu' },
-            { text: 'Moko', type: 'round', lang: 'en', fileBase: 'moko' },
-            { text: 'Kiki', type: 'sharp', lang: 'en', fileBase: 'kiki' },
-            { text: 'Takete', type: 'sharp', lang: 'en', fileBase: 'takete' },
-            { text: 'Kaki', type: 'sharp', lang: 'en', fileBase: 'kaki' },
-            { text: 'Toge', type: 'sharp', lang: 'en', fileBase: 'toge' }
+            { text: 'ブーバ', type: 'round', lang: 'ja', fileBase: 'booba' }, { text: 'マロ', type: 'round', lang: 'ja', fileBase: 'maro' },
+            { text: 'ルル', type: 'round', lang: 'ja', fileBase: 'lulu' }, { text: 'モコ', type: 'round', lang: 'ja', fileBase: 'moko' },
+            { text: 'キキ', type: 'sharp', lang: 'ja', fileBase: 'kiki' }, { text: 'タケテ', type: 'sharp', lang: 'ja', fileBase: 'takete' },
+            { text: 'カキ', type: 'sharp', lang: 'ja', fileBase: 'kaki' }, { text: 'トゲ', type: 'sharp', lang: 'ja', fileBase: 'toge' },
+            { text: 'Bouba', type: 'round', lang: 'en', fileBase: 'booba' }, { text: 'Malo', type: 'round', lang: 'en', fileBase: 'malo' },
+            { text: 'Lulu', type: 'round', lang: 'en', fileBase: 'lulu' }, { text: 'Moko', type: 'round', lang: 'en', fileBase: 'moko' },
+            { text: 'Kiki', type: 'sharp', lang: 'en', fileBase: 'kiki' }, { text: 'Takete', type: 'sharp', lang: 'en', fileBase: 'takete' },
+            { text: 'Kaki', type: 'sharp', lang: 'en', fileBase: 'kaki' }, { text: 'Toge', type: 'sharp', lang: 'en', fileBase: 'toge' }
         ];
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
-        
-        // 💡 説明文を「音ではなく、目に見えているフォントの形で判断」という確実な教示に書き換えました
         const textData = {
             ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の『音の響き』ではなく、**目に見えている『文字のフォントの形』**が丸い印象か角ばっている印象か判断してください。", d2: "直感で構いませんので、できるだけ<strong>速く、正確に</strong>下のボタン（◯ か ♢）を押してください。", start: "次へ進む", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する" },
             en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the **visual 'shape of the font'** feels round or sharp, NOT the sound or meaning of the word.", d2: "Please press the button (◯ or ♢) as <strong>fast and accurately</strong> as possible.", start: "Next", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start" }
@@ -173,22 +155,12 @@
         }
         function endExperiment() {
             document.getElementById('trial-screen').classList.add('hidden');
-            document.getElementById('counter').classList.add('hidden');
+            document.getElementById('counter').classList.remove('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             const uid = "id_" + Date.now();
             const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
-            
-            // あなたのGASのURLをここに自動セットしています
             const gasUrl = "https://google.com"; 
-            
-            if (gasUrl !== "ここに" + "コピーしたウェブアプリのURLを貼り付けてください") {
-                fetch(gasUrl, {
-                    method: "POST",
-                    mode: "no-cors",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dataToSend)
-                });
-            }
+            fetch(gasUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dataToSend) });
         }
     </script>
 </body>
