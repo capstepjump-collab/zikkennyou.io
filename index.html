@@ -14,15 +14,16 @@
         #stimulus-img { max-width: 350px; max-height: 350px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
         .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
         
-        /* 💡 すべてのボタンのデザインを「青色ベース」に統一しました */
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #007bff; color: white; box-shadow: 0 8px 16px rgba(0,123,255,0.2); transition: transform 0.1s, background-color 0.1s; }
         .btn:hover { background-color: #0056b3; }
         .btn:active { transform: scale(0.95); }
         .trial-btn { font-size: 4rem; padding: 20px 80px; min-width: 240px; }
         
-        /* 💡 戻るボタン専用のグレーのデザインです */
         .back-btn { background: #6c757d; box-shadow: 0 8px 16px rgba(108,117,125,0.2); }
         .back-btn:hover { background-color: #545b62; }
+        
+        /* 💡 「音の響きの印象」を赤く・大きく・太字にするための専用スタイル */
+        .highlight-text { color: #dc3545; font-size: 1.9rem; font-weight: 900; display: inline-block; margin: 0 5px; vertical-align: middle; }
         
         .hidden { display: none !important; }
     </style>
@@ -51,7 +52,6 @@
             <h1 id="ready-title"></h1>
             <p id="ready-desc"></p>
             <div class="button-container">
-                <!-- 💡 一つ前の画面に戻るボタンを追加しました -->
                 <button class="btn back-btn" id="back-btn" onclick="goBackToStartScreen()"></button>
                 <button class="btn" id="ready-btn" onclick="startExperiment()"></button>
             </div>
@@ -62,7 +62,6 @@
                 <img id="stimulus-img" src="" alt="stimulus">
             </div>
             <div class="button-container">
-                <!-- 💡 角ばっているマークを「□」に変更しました -->
                 <button class="btn trial-btn" id="choice-round" onclick="handleResponse('round')">◯</button>
                 <button class="btn trial-btn" id="choice-sharp" onclick="handleResponse('sharp')">□</button>
             </div>
@@ -87,10 +86,10 @@
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
         
-        // 💡 説明文の中の指示（◯ か □）も新しい記号に書き換えました
+        // 💡 日本語と英語の教示文をアップデートし、特定の文字に装飾用タグ（<span class="highlight-text">）を入れました
         const textData = {
-            ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の『音の響き』ではなく、<storong>目に見えている『文字のフォントの形』</strong>が丸い印象か角ばっている印象か判断してください。", d2: "直感で構いませんので、できるだけ<strong>速く、正確に</strong>下のボタン（◯ か □）を押してください。", start: "次へ進む", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する", backB: "戻る" },
-            en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the **visual 'shape of the font'** feels round or sharp, NOT the sound or meaning of the word.", d2: "Please press the button (◯ or □) as <strong>fast and accurately</strong> as possible.", start: "Next", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start", backB: "Back" }
+            ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の<span class='highlight-text'>音の響きの印象</span>が丸いか角ばっているか判断してください。", d2: "直感で構いませんので、できるだけ<strong>速く、正確に</strong>下のボタン（◯ か □）を押してください。", start: "次へ進む", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する", backB: "戻る" },
+            en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the <span class='highlight-text'>sound impression</span> of the displayed word feels round or sharp.", d2: "Please press the button (◯ or □) as <strong>fast and accurately</strong> as possible.", start: "Next", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start", backB: "Back" }
         };
         function selectLanguage(lang) {
             selectedLang = lang;
@@ -113,7 +112,6 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('ready-screen').classList.remove('hidden');
         }
-        // 💡 一つ前の画面に戻る処理
         function goBackToStartScreen() {
             document.getElementById('ready-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
@@ -180,7 +178,7 @@
         }
         function endExperiment() {
             document.getElementById('trial-screen').classList.add('hidden');
-            document.getElementById('counter').classList.remove('hidden');
+            document.getElementById('counter').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
             const uid = "id_" + Date.now();
             const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
