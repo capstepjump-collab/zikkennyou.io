@@ -16,27 +16,36 @@
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
         .lang-btn { background: #007bff; color: white; margin: 15px; }
-        #data-box { width: 100%; height: 180px; font-family: monospace; font-size: 1.1rem; margin-top: 30px; padding: 15px; box-sizing: border-box; border: 2px solid #ccc; border-radius: 10px; background: #fff; resize: none; }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
     <div id="counter" class="hidden"><span id="counter-label">残り</span>: <span id="remaining">15</span></div>
     <div id="experiment-container">
+        <!-- 言語選択画面 -->
         <div id="lang-screen">
             <h1>Language / 言語選択</h1>
-            <p>Please select your primary language.<br>あなたの言語圏を選択してください。</p>
+            <p>Please select your language.<br>言語を選択してください。</p>
             <div class="button-container">
                 <button class="btn lang-btn" onclick="selectLanguage('ja')">日本語</button>
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
+        <!-- 導入画面（ルール説明） -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
-            <button class="btn" id="start-btn" onclick="startExperiment()"></button>
+            <!-- ２．ボタンの文字を「次へ」に変更 -->
+            <button class="btn" id="start-btn" onclick="goToReadyScreen()"></button>
         </div>
+        <!-- ２．一回間を取るための「心の準備画面」を追加 -->
+        <div id="ready-screen" class="hidden">
+            <h1 id="ready-title">準備はいいですか？</h1>
+            <p id="ready-desc">「開始する」を押すと、すぐに最初の問題の画像が表示されます。心の準備をしてから押してください。</p>
+            <button class="btn" id="ready-btn" onclick="startExperiment()">開始する</button>
+        </div>
+        <!-- メイン画面 -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus-container">
                 <img id="stimulus-img" src="" alt="stimulus">
@@ -46,11 +55,10 @@
                 <button class="btn" id="choice-sharp" onclick="handleResponse('sharp')"></button>
             </div>
         </div>
+        <!-- 終了画面（１．被験者用の結果データ表示枠を完全に消去しました） -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
-            <p style="font-size: 1.1rem; color: #666; margin-top: 40px;">【バックアップ用】送信エラーが起きた場合は、以下のテキストをコピーしてください：</p>
-            <textarea id="data-box" readonly onclick="this.select()"></textarea>
         </div>
     </div>
     <script>
@@ -75,8 +83,8 @@
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
         const textData = {
-            ja: { counter: "残り", title: "実験開始", d1: "表示される<strong>言葉の印象</strong>が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>ボタンを押してください。", start: "開始する", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "データをスプレッドシートに送信中...少々お待ちください。" },
-            en: { counter: "Remaining", title: "Experiment Start", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Start", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Sending data to the spreadsheet... please wait." }
+            ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の印象が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>下のボタンを押してください。", start: "次へ進む", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する" },
+            en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Next", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start" }
         };
         function selectLanguage(lang) {
             selectedLang = lang;
@@ -90,8 +98,16 @@
             document.getElementById('choice-sharp').innerText = d.sharp;
             document.getElementById('end-title').innerText = d.endT;
             document.getElementById('end-desc').innerText = d.endD;
+            document.getElementById('ready-title').innerText = d.readyT;
+            document.getElementById('ready-desc').innerText = d.readyD;
+            document.getElementById('ready-btn').innerText = d.readyB;
             document.getElementById('lang-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
+        }
+        // ２．「次へ進む」を押したときの準備画面への移動処理
+        function goToReadyScreen() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('ready-screen').classList.remove('hidden');
         }
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
@@ -123,7 +139,7 @@
         }
         function startExperiment() {
             setupTrials();
-            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('ready-screen').classList.add('hidden'); // 準備画面を隠す
             document.getElementById('counter').classList.remove('hidden');
             document.getElementById('trial-screen').classList.remove('hidden');
             nextTrial();
@@ -148,7 +164,7 @@
                 word: trials[currentTrialIndex].text,
                 font: fontName,
                 response: responseName,
-                rt: Math.round(rt) + "ms"
+                rt: Math.round(rt) // 💡 後から平均を自動計算できるよう「ms」という文字を消し、純粋な数字に変更
             });
             currentTrialIndex++;
             nextTrial();
@@ -157,26 +173,18 @@
             document.getElementById('trial-screen').classList.add('hidden');
             document.getElementById('counter').classList.add('hidden');
             document.getElementById('end-screen').classList.remove('hidden');
-            const myTab = String.fromCharCode(9);
-            const myNewline = String.fromCharCode(10);
-            let backupText = "単語" + myTab + "フォント" + myTab + "回答" + myTab + "反応時間" + myNewline;
-            results.forEach(r => { backupText += r.word + myTab + r.font + myTab + r.response + myTab + r.rt + myNewline; });
-            document.getElementById('data-box').value = backupText;
             const uid = "id_" + Date.now();
             const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
             
-            const gasUrl = "https://script.google.com/macros/s/AKfycbz4VtiW2Xic__N57l3Yq-Hrvs2nmO122sR62HqzJUsH_r7sUlzzpKVzFj8gSWGvJsMY/exec";
+            // ⚠️ あなたのGASの長いURLを、下のダブルクォーテーションの間に貼り付け直してください！
+            const gasUrl = "https://script.google.com/macros/s/AKfycbwAuc0734qiDhgoFOAlJEOWcGhfb0KHea8CaJy_BMZHLxzObavY6e2zwWzJqR7pQd6G/exec"; 
             
-            if (gasUrl !== "https://script.google.com/macros/s/AKfycbz4VtiW2Xic__N57l3Yq-Hrvs2nmO122sR62HqzJUsH_r7sUlzzpKVzFj8gSWGvJsMY/exec") {
+            if (gasUrl !== "ここに" + "コピーしたウェブアプリのURLを貼り付けてください") {
                 fetch(gasUrl, {
                     method: "POST",
                     mode: "no-cors",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(dataToSend)
-                }).then(() => {
-                    document.getElementById('end-desc').innerText = selectedLang === 'ja' ? "ご協力ありがとうございました。" : "Thank you for your cooperation.";
-                }).catch(() => {
-                    document.getElementById('end-desc').innerText = selectedLang === 'ja' ? "送信エラーが発生しました。下のテキストを保存してください。" : "Submission error. Please save the text below.";
                 });
             }
         }
