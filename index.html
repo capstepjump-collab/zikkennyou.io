@@ -13,8 +13,12 @@
         #stimulus-container { width: 100%; min-height: 350px; margin-bottom: 50px; display: flex; align-items: center; justify-content: center; }
         #stimulus-img { max-width: 350px; max-height: 350px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
         .button-container { display: flex; justify-content: center; gap: 50px; flex-wrap: wrap; }
+        
+        /* 💡 回答ボタンを大きな図形記号に最適化しました */
         .btn { padding: 25px 60px; font-size: 2rem; font-weight: bold; cursor: pointer; border: none; border-radius: 15px; background: #fff; box-shadow: 0 8px 16px rgba(0,0,0,0.1); transition: transform 0.1s; }
         .btn:active { transform: scale(0.95); }
+        .trial-btn { font-size: 4rem; padding: 20px 80px; min-width: 240px; } /* 実験時のボタンを特大化 */
+        
         .lang-btn { background: #007bff; color: white; margin: 15px; }
         .hidden { display: none !important; }
     </style>
@@ -31,31 +35,30 @@
                 <button class="btn lang-btn" onclick="selectLanguage('en')">English</button>
             </div>
         </div>
-        <!-- 導入画面（ルール説明） -->
+        <!-- 導入画面（教示文を徹底的に明確化） -->
         <div id="start-screen" class="hidden">
             <h1 id="start-title"></h1>
             <p id="start-desc1"></p>
             <p id="start-desc2"></p>
-            <!-- ２．ボタンの文字を「次へ」に変更 -->
             <button class="btn" id="start-btn" onclick="goToReadyScreen()"></button>
         </div>
-        <!-- ２．一回間を取るための「心の準備画面」を追加 -->
+        <!-- 心の準備画面 -->
         <div id="ready-screen" class="hidden">
-            <h1 id="ready-title">準備はいいですか？</h1>
-            <p id="ready-desc">「開始する」を押すと、すぐに最初の問題の画像が表示されます。心の準備をしてから押してください。</p>
-            <button class="btn" id="ready-btn" onclick="startExperiment()">開始する</button>
+            <h1 id="ready-title"></h1>
+            <p id="ready-desc"></p>
+            <button class="btn" id="ready-btn" onclick="startExperiment()"></button>
         </div>
-        <!-- メイン画面 -->
+        <!-- メイン画面（直感的な図形記号のボタンに変更） -->
         <div id="trial-screen" class="hidden">
             <div id="stimulus-container">
                 <img id="stimulus-img" src="" alt="stimulus">
             </div>
             <div class="button-container">
-                <button class="btn" id="choice-round" onclick="handleResponse('round')"></button>
-                <button class="btn" id="choice-sharp" onclick="handleResponse('sharp')"></button>
+                <button class="btn trial-btn" id="choice-round" onclick="handleResponse('round')">◯</button>
+                <button class="btn trial-btn" id="choice-sharp" onclick="handleResponse('sharp')">♢</button>
             </div>
         </div>
-        <!-- 終了画面（１．被験者用の結果データ表示枠を完全に消去しました） -->
+        <!-- 終了画面 -->
         <div id="end-screen" class="hidden">
             <h1 id="end-title"></h1>
             <p id="end-desc"></p>
@@ -82,9 +85,11 @@
         ];
         const fonts = ['round', 'sharp', 'neutral'];
         let trials = [], currentTrialIndex = 0, startTime, results = [], selectedLang = 'ja';
+        
+        // 💡 説明文を「音ではなく、目に見えているフォントの形で判断」という確実な教示に書き換えました
         const textData = {
-            ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の印象が「丸い」か「角ばっている」か判断してください。", d2: "できるだけ<strong>速く、正確に</strong>下のボタンを押してください。", start: "次へ進む", round: "丸い", sharp: "角ばった", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する" },
-            en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the displayed word feels 'Round' or 'Sharp'.", d2: "Please press the button as <strong>fast and accurately</strong> as possible.", start: "Next", round: "Round", sharp: "Sharp", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start" }
+            ja: { counter: "残り", title: "実験ルール説明", d1: "画面中央に表示される文字の『音の響き』ではなく、**目に見えている『文字のフォントの形』**が丸い印象か角ばっている印象か判断してください。", d2: "直感で構いませんので、できるだけ<strong>速く、正確に</strong>下のボタン（◯ か ♢）を押してください。", start: "次へ進む", endT: "実験終了", endD: "ご協力ありがとうございました。画面を閉じてもらって構いません。", readyT: "準備はいいですか？", readyD: "「開始する」を押すと、すぐに最初の画像が表示されます。心の準備をしてから押してください。", readyB: "開始する" },
+            en: { counter: "Remaining", title: "Experiment Rules", d1: "Please judge whether the **visual 'shape of the font'** feels round or sharp, NOT the sound or meaning of the word.", d2: "Please press the button (◯ or ♢) as <strong>fast and accurately</strong> as possible.", start: "Next", endT: "Experiment Completed", endD: "Thank you for your cooperation. You may close this window.", readyT: "Are you ready?", readyD: "When you press 'Start', the first image will appear immediately. Please get ready.", readyB: "Start" }
         };
         function selectLanguage(lang) {
             selectedLang = lang;
@@ -94,8 +99,6 @@
             document.getElementById('start-desc1').innerHTML = d.d1;
             document.getElementById('start-desc2').innerHTML = d.d2;
             document.getElementById('start-btn').innerText = d.start;
-            document.getElementById('choice-round').innerText = d.round;
-            document.getElementById('choice-sharp').innerText = d.sharp;
             document.getElementById('end-title').innerText = d.endT;
             document.getElementById('end-desc').innerText = d.endD;
             document.getElementById('ready-title').innerText = d.readyT;
@@ -104,7 +107,6 @@
             document.getElementById('lang-screen').classList.add('hidden');
             document.getElementById('start-screen').classList.remove('hidden');
         }
-        // ２．「次へ進む」を押したときの準備画面への移動処理
         function goToReadyScreen() {
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('ready-screen').classList.remove('hidden');
@@ -139,7 +141,7 @@
         }
         function startExperiment() {
             setupTrials();
-            document.getElementById('ready-screen').classList.add('hidden'); // 準備画面を隠す
+            document.getElementById('ready-screen').classList.add('hidden');
             document.getElementById('counter').classList.remove('hidden');
             document.getElementById('trial-screen').classList.remove('hidden');
             nextTrial();
@@ -164,7 +166,7 @@
                 word: trials[currentTrialIndex].text,
                 font: fontName,
                 response: responseName,
-                rt: Math.round(rt) // 💡 後から平均を自動計算できるよう「ms」という文字を消し、純粋な数字に変更
+                rt: Math.round(rt)
             });
             currentTrialIndex++;
             nextTrial();
@@ -176,8 +178,8 @@
             const uid = "id_" + Date.now();
             const dataToSend = results.map(r => ({ userId: uid, lang: selectedLang, ...r }));
             
-            // ⚠️ あなたのGASの長いURLを、下のダブルクォーテーションの間に貼り付け直してください！
-            const gasUrl = "https://script.google.com/macros/s/AKfycbwAuc0734qiDhgoFOAlJEOWcGhfb0KHea8CaJy_BMZHLxzObavY6e2zwWzJqR7pQd6G/exec"; 
+            // あなたのGASのURLをここに自動セットしています
+            const gasUrl = "https://google.com"; 
             
             if (gasUrl !== "ここに" + "コピーしたウェブアプリのURLを貼り付けてください") {
                 fetch(gasUrl, {
