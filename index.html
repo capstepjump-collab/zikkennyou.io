@@ -140,20 +140,19 @@
             shuffle(remainsPool);
             for (let i = 0; i < 11; i++) { selectedTrials.push(remainsPool.pop()); }
             
-            // 💡 15問の中に「同じ文字」が絶対に連続して並ばないように制御する最新アルゴリズム
+            // 💡 無限ループ（フリーズバグ）を絶対に起こさないセーフティ付きアルゴリズムに修正
             let shuffledList = [];
             let attempts = 0;
-            while (attempts < 100) {
+            while (attempts < 50) { // シャッフル挑戦を最大50回に制限してフリーズを回避します
                 shuffledList = shuffle([...selectedTrials]);
                 let isOK = true;
                 for (let i = 0; i < shuffledList.length - 1; i++) {
-                    // 隣り合う問題の「fileBase（単語名）」が同じだった場合はNG判定にする
                     if (shuffledList[i].fileBase === shuffledList[i+1].fileBase) {
                         isOK = false;
                         break;
                     }
                 }
-                if (isOK) break; // 連続がなければ並び替えを確定して終了
+                if (isOK) break; 
                 attempts++;
             }
             trials = shuffledList;
@@ -199,3 +198,6 @@
             const gasUrl = "https://google.com"; 
             fetch(gasUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(dataToSend) });
         }
+    </script>
+</body>
+</html>
